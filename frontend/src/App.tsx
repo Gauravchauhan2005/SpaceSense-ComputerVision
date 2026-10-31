@@ -10,12 +10,31 @@ import { SettingsPage } from './pages/SettingsPage';
 import { useWebSocket } from './hooks/useWebSocket';
 
 export const App: React.FC = () => {
-  const { trackingData, frameData, status, history } = useWebSocket();
+  const {
+    trackingData,
+    frameData,
+    status,
+    history,
+    isClientStreaming,
+    startClientCamera,
+    stopClientCamera,
+  } = useWebSocket();
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout status={status} fps={trackingData?.fps ?? 0} />}>
+        <Route
+          path="/"
+          element={
+            <Layout
+              status={status}
+              fps={trackingData?.fps ?? 0}
+              isClientStreaming={isClientStreaming}
+              onStartCamera={startClientCamera}
+              onStopCamera={stopClientCamera}
+            />
+          }
+        >
           <Route index element={<LiveMonitor trackingData={trackingData} frameData={frameData} history={history} />} />
           <Route path="motion" element={<MotionAnalysis trackingData={trackingData} frameData={frameData} />} />
           <Route path="calibration" element={<Calibration frameData={frameData} trackingData={trackingData} />} />

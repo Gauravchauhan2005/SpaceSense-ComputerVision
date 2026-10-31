@@ -19,15 +19,28 @@ import type { ConnectionStatus } from '../types';
 interface LayoutProps {
   status: ConnectionStatus;
   fps?: number;
+  isClientStreaming?: boolean;
+  onStartCamera?: () => Promise<void>;
+  onStopCamera?: () => void;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ status, fps = 0 }) => {
+export const Layout: React.FC<LayoutProps> = ({
+  status,
+  fps = 0,
+  isClientStreaming = false,
+  onStartCamera,
+  onStopCamera,
+}) => {
   const [cameraBusy, setCameraBusy] = useState(false);
 
   const handleStartCamera = async () => {
     try {
       setCameraBusy(true);
-      await api.startCamera(0, [640, 480]);
+      if (onStartCamera) {
+        await onStartCamera();
+      } else {
+        await api.startCamera(0, [640, 480]);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -38,7 +51,11 @@ export const Layout: React.FC<LayoutProps> = ({ status, fps = 0 }) => {
   const handleStopCamera = async () => {
     try {
       setCameraBusy(true);
-      await api.stopCamera();
+      if (onStopCamera) {
+        onStopCamera();
+      } else {
+        await api.stopCamera();
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -104,15 +121,15 @@ export const Layout: React.FC<LayoutProps> = ({ status, fps = 0 }) => {
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={handleStartCamera}
-              disabled={cameraBusy}
+              disabled={cameraBusy || isClientStreaming}
               className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#37C98B]/20 text-[#37C98B] hover:bg-[#37C98B]/30 border border-[#37C98B]/40 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
             >
               <Play className="w-3.5 h-3.5 fill-current" />
-              <span>Start</span>
+              <span>{isClientStreaming ? 'Running' : 'Start'}</span>
             </button>
             <button
               onClick={handleStopCamera}
-              disabled={cameraBusy}
+              disabled={cameraBusy || (!isClientStreaming && status !== 'connected')}
               className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#FF5C65]/20 text-[#FF5C65] hover:bg-[#FF5C65]/30 border border-[#FF5C65]/40 rounded-lg text-xs font-semibold transition-all disabled:opacity-50"
             >
               <Square className="w-3.5 h-3.5 fill-current" />
