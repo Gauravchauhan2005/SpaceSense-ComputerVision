@@ -22,11 +22,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend, models, calibration, and data directories
+# Copy backend, models, and create data/calibration directories
 COPY backend/ ./backend/
 COPY models/ ./models/
-COPY calibration/ ./calibration/
-RUN mkdir -p data
+RUN mkdir -p data calibration
 
 EXPOSE 8000
 
